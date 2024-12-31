@@ -1,0 +1,108 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f7fc;
+}
+
+.split-container {
+    display: flex;
+    width: 80%;
+    height: 80%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.form-section {
+    width: 30%;
+    background-color: #ffffff;
+    border-right: 1px solid #ddd;
+    padding: 20px; /* Added padding for better spacing */
+}
+
+.form-title {
+    font-size: 24px; /* Increased font size */
+    color: #007bff; /* Changed color to match the style */
+    text-align: center; /* Centered the title */
+    margin-bottom: 20px; /* Added margin for spacing */
+}
+
+.chat-section {
+    width: 70%;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: auto;
+}
+
+#chat-container {
+    flex-grow: 1;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.chat-message {
+    margin: 10px 0;
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 75%;
+}
+
+.user {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+}
+
+.ai {
+    background-color: #e9ecef;
+    color: #333;
+    align-self: flex-start;
+}
+
+input[type="text"] {
+    width: calc(100% - 20px); /* Adjusted width for better fit */
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px; /* Added margin for spacing */
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.form-section, .chat-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make the resizer visible and ensure it has absolute positioning */
+.resizer {
+    background-color: #ccc;
+    cursor: ew-resize;
+    width: 5px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 50%; /* Initially place it in the center of the container */
+    z-index: 10; /* Ensure it is on top of other content */
+}
