@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Path to the Dockerfile
+    container_name: app
+    ports:
+      - "8000:8000"  # Expose FastAPI on port 8000
+    environment:
+      - OPENAI_BASE=${OPENAI_BASE}
+      - LLMFOUNDRY_TOKEN=${LLMFOUNDRY_TOKEN}
+      - PROJECT_NAME=${PROJECT_NAME}
+      - REDIS_URL=redis://localhost:6379
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"  # Redis default port
+    restart: always
