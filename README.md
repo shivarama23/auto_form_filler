@@ -11,7 +11,7 @@
     ```bash
     uvicorn main:app --reload
     ```
-4. Open `frontend/index.html` in a browser
+4. Open `localhost:8000` in a browser
 
 ## Usage
 - Real-time chat enabled with WebSocket
