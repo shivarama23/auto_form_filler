@@ -16,3 +16,10 @@
 ## Usage
 - Real-time chat enabled with WebSocket
 - Session-based chat history is maintained using sessionStorage
+
+
+How to check redis?
+Assuming you are using a docker instance of redis service.
+docker exec -it redis-server redis-cli
+> GET <session_id>
+> GET session:qwqw8q ---> this is a example
