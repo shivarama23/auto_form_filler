@@ -12,9 +12,14 @@ services:
       - OPENAI_BASE=${OPENAI_BASE}
       - LLMFOUNDRY_TOKEN=${LLMFOUNDRY_TOKEN}
       - PROJECT_NAME=${PROJECT_NAME}
-      - REDIS_URL=redis://localhost:6379
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_HOST=postgres  # Use service name for PostgreSQL
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     depends_on:
       - redis
+      - postgres
     restart: always
 
   redis:
@@ -23,3 +28,20 @@ services:
     ports:
       - "6379:6379"  # Redis default port
     restart: always
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    ports:
+      - "5432:5432"  # PostgreSQL default port
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:
+  

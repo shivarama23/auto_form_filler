@@ -9,3 +9,5 @@ langchain-text-splitters
 langsmith==0.1.147
 redis
 uvicorn[standard]
+sqlalchemy
+psycopg2

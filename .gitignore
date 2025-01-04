@@ -3,3 +3,10 @@
 .vscode
 __pycache__
 redis_test.py
+test_postgres.py
+test_redis.py
+test_firecrawl.py
+*.pptx
+*.md
+website_crawled_data
+test_firecrawl.ipynb
