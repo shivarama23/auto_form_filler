@@ -1,8 +1,10 @@
 import os
+import json
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
+from prompts import get_entities_prompt, get_chat_prompt_template
 load_dotenv()
 
 # Initialize the model
@@ -13,15 +15,27 @@ model = ChatOpenAI(
 )
 
 # Define the prompt template
-prompt_template = ChatPromptTemplate.from_template("You are a helpful assistant. {history} User: {input}")
+# prompt_template = ChatPromptTemplate.from_template("You are a helpful assistant. Always reply in 1 sentence as you are a chat assistant {history} User: {input}")
+prompt_template = get_chat_prompt_template()
 
-def get_response(user_input, session):
+def get_response(user_input, session, user_role=""):
     # Initialize session keys if they don't exist
     session.setdefault("history", [])
-    session.setdefault("user_data", {"name": "", "age": "", "email": ""})
+    session.setdefault("user_data", {
+        "name": "", "age": "", "email": "",
+        "grade": "", "accommodations": "",
+        "career": "", "interests": "", "strengths": "",
+        "subjects": "", "enrollmentDate": "",
+        "specialServices": "", "improvement": "", "budget": ""
+    })
+    session.setdefault("user_role", "")
     
     # Append the user's message to the session history
     session["history"].append({"role": "user", "content": user_input})
+    if user_role and session["user_role"] == "":
+        session["user_role"] = user_role
+    else:
+        pass
     
     # Prepare the prompt with history
     history = "\n".join([f"{msg['role']}: {msg['content']}" for msg in session["history"]])
@@ -31,13 +45,18 @@ def get_response(user_input, session):
     ai_response = model.invoke(prompt)
     session["history"].append({"role": "ai", "content": ai_response.content})
     
-    # Extract form fields from conversation (case-insensitive parsing)
-    user_input_lower = user_input.lower()
-    if "name is" in user_input_lower:
-        session["user_data"]["name"] = user_input.split("name is")[-1].strip()
-    if "age is" in user_input_lower:
-        session["user_data"]["age"] = user_input.split("age is")[-1].strip()
-    if "email is" in user_input_lower:
-        session["user_data"]["email"] = user_input.split("email is")[-1].strip()
+    prompt_entity = get_entities_prompt(user_input)
+    ai_response_entity = model.invoke(prompt_entity)
+    output_entity = ai_response_entity.content
+
+    try:
+        output_dict = output_entity.replace('```json', '').replace('```', '').strip()
+        output_json = json.loads(output_dict)
+        for key, value in output_json.items():
+            if key in session["user_data"]:
+                if session["user_data"][key] == "":
+                    session["user_data"][key] = value
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
     
     return ai_response.content, session

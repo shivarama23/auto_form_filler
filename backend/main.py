@@ -29,25 +29,30 @@ app.add_middleware(
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
     try:
         await websocket.accept()
-        # Fetch the session from Redis
-        session = session_manager.get_session(session_id)  # Get or create the session
-        
+        session = session_manager.get_session(session_id)
+
         while True:
-            # Receive the user message
+            # Receive the user message and role (if provided)
             data = await websocket.receive_text()
-            
-            # Get the response from the chatbot, along with any form data
-            response, session = get_response(data, session)
+            # Check if the data is JSON string
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {"message": data}
+
+            role = data.get('role', "")
+            user_message = data.get('message')
+
+            # Get the response from the chatbot (pass the role if needed)
+            response, session = get_response(user_message, session, role)
 
             # Save the updated session back to Redis
             session_manager.save_session(session_id, session)
 
-            # Send the AI's response and form data back to the frontend
+            # Send the AI's response back to the frontend
             await websocket.send_text(json.dumps({"response": response, "form_data": session["user_data"]}))
     except WebSocketDisconnect as e:
-        # Handle the disconnect gracefully
         logging.info(f"Client {session_id} disconnected. Code: {e.code}, Reason: {e.reason}")
-        # Optionally, clean up the session in Redis (if desired)
         session_manager.delete_session(session_id)
         logging.info(f"Session {session_id} cleaned up from Redis.")
 

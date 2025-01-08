@@ -58,7 +58,13 @@ class SessionManager:
             # Create a new session if it doesn't exist
             session_data = {
                 "history": [],  # A list of messages (user and AI)
-                "user_data": {"name": "", "age": "", "email": ""},  # User-specific information
+                "user_data": {
+                            "name": "", "age": "", "email": "",
+                            "grade": "", "accommodations": "",
+                            "career": "", "interests": "", "strengths": "",
+                            "subjects": "", "enrollmentDate": "",
+                            "specialServices": "", "improvement": "", "budget": ""
+                        },  # User-specific information
             }
             # Save new session to Redis
             self.redis_client.setex(key, timedelta(seconds=self.session_ttl), json.dumps(session_data))
