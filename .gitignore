@@ -6,6 +6,7 @@ redis_test.py
 test_postgres.py
 test_redis.py
 test_firecrawl.py
+test_rag_q.ipynb
 *.pptx
 *.md
 website_crawled_data
