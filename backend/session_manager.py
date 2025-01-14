@@ -1,32 +1,12 @@
 import redis
 import json
 from datetime import datetime, timedelta
-
-import redis
-import json
-from datetime import timedelta
+import psycopg2
 
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
-# class SessionManager:
-#     def __init__(self):
-#         # Store sessions in a dictionary
-#         self.sessions = {}
-#         # self.llm = llm  # Save the LLM object to initialize the ConversationChain
-
-#     def get_session(self, session_id: str):
-#         # If session does not exist, create it with default data and a new ConversationChain
-#         if session_id not in self.sessions:
-#             self.sessions[session_id] = {
-#                 "history": [],       # A list of messages (user and AI)
-#                 "user_data": {"name":"", "age":"", "email":""},     # A dictionary for user-specific information (e.g., name, age)
-#                 # "conversation_chain": ConversationChain(llm=self.llm),  # ConversationChain instance for this session
-#             }
-#         return self.sessions[session_id]
-
-
 class SessionManager:
-    def __init__(self, redis_host="localhost", redis_port=6379, session_ttl=3600):
+    def __init__(self, redis_host="localhost", redis_port=6379, session_ttl=3600, db_config=None):
         """
         Initialize the SessionManager with Redis connection.
         
@@ -37,6 +17,7 @@ class SessionManager:
         """
         self.redis_client = redis.StrictRedis(host=redis_host, port=redis_port, decode_responses=True)
         self.session_ttl = session_ttl  # Session expiry time in seconds
+        self.db_config = db_config
 
     def get_session(self, session_id: str):
         """
@@ -92,3 +73,28 @@ class SessionManager:
         key = f"session:{session_id}"
         self.redis_client.delete(key)
 
+    def transfer_to_db(self, session_id: str):
+        """
+        Transfer session data to the database.
+        
+        Args:
+            session_id (str): The unique ID for the session.
+        """
+        session_data = self.get_session(session_id)
+        history = session_data.get("history", [])
+        user_data = session_data.get("user_data", {})
+        if self.db_config:
+            conn = psycopg2.connect(**self.db_config)
+            cursor = conn.cursor()
+            # Insert session data into the database
+            insert_query = """
+                INSERT INTO chat_sessions (session_id, user_data, history)
+                VALUES (%s, %s, %s)
+            """
+            cursor.execute(insert_query, (session_id, json.dumps(user_data), json.dumps(history)))
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+        else:
+            raise ValueError("Database configuration is missing.")
