@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from session_manager import SessionManager
 from chat import get_response
@@ -11,7 +12,15 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
-session_manager = SessionManager(redis_host="redis", redis_port=6379)
+db_config = {
+    "host": "postgres",
+    "port": 5432,
+    "dbname": os.getenv("POSTGRES_DB"),
+    "user": os.getenv("POSTGRES_USER"),
+    "password": os.getenv("POSTGRES_PASSWORD")
+}
+
+session_manager = SessionManager(redis_host="redis", redis_port=6379, db_config=db_config)
 
 frontend_path = Path(__file__).parent.parent / "frontend"
 
@@ -53,6 +62,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             await websocket.send_text(json.dumps({"response": response, "form_data": session["user_data"]}))
     except WebSocketDisconnect as e:
         logging.info(f"Client {session_id} disconnected. Code: {e.code}, Reason: {e.reason}")
+        session_manager.transfer_to_db(session_id)
         session_manager.delete_session(session_id)
         logging.info(f"Session {session_id} cleaned up from Redis.")
 
