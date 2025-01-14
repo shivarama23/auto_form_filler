@@ -43,7 +43,11 @@ def get_response(user_input, session, user_role=""):
     
     # Get model response
     ai_response = model.invoke(prompt)
-    session["history"].append({"role": "ai", "content": ai_response.content})
+    ai_chat_output = ai_response.content
+    if ai_chat_output.startswith("ai:"):
+        ai_chat_output = ai_chat_output.replace("ai:", "").strip()
+    session["history"].append({"role": "ai", "content": ai_chat_output})
+
     
     prompt_entity = get_entities_prompt(user_input)
     ai_response_entity = model.invoke(prompt_entity)
@@ -59,4 +63,4 @@ def get_response(user_input, session, user_role=""):
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
     
-    return ai_response.content, session
+    return ai_chat_output, session
